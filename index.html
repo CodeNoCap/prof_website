@@ -21,37 +21,66 @@
                 <li><a href="#journal">Journal</a></li>
             </ul>
         </nav>
-        <div class="profile">
+        <div id="g_id_onload"
+            data-client_id="29223993159-rnmupeuep8akov7uvvlaopg8ar404986.apps.googleusercontent.com"
+            data-callback="handleCredentialResponse"
+            data-auto_prompt="false">
+        </div>
+        <div class="profile" id="google-signin">
             <i class="material-icons">account_circle</i>
-            <span class="username">Username</span>
+            <span id="username">Sign In</span>
         </div>
     </header>
 
-    <div class="status-bar">
+
+    <div class="status-widget-container">
         <div class="status-widget">
-            <div class="statususername">LALIGHT</div>
-            <div class="status-details">
+            <div class="status-username">LALIGHT</div>
+            <div class="status-info">
                 <div class="status-circle"></div>
-                <div class="status-text">
+                <div class="status-details">
                     <div class="action">Online</div>
-                    <div class="time-elapsed">5 minutes ago</div>
+                    <div class="time-elapsed">5m ago</div>
                 </div>
             </div>
         </div>
-    
         <div class="status-widget">
-            <div class="statususername">KYLE</div>
-            <div class="status-details">
+            <div class="status-username">KAI-KAI</div>
+            <div class="status-info">
                 <div class="status-circle"></div>
-                <div class="status-text">
-                    <div class="action">Offline</div>
-                    <div class="time-elapsed">2 hours ago</div>
+                <div class="status-details">
+                    <div class="action">Away</div>
+                    <div class="time-elapsed">10m ago</div>
                 </div>
             </div>
         </div>
     </div>
     
+    <!-- Popup Structure -->
+    <div class="popup hidden">
+        <div class="popup-content">
+            <label for="status-dropdown">Status:</label>
+            <select id="status-dropdown">
+                <option value="active">Active</option>
+                <option value="busy">Busy</option>
+                <option value="offline">Offline</option>
+            </select>
+            <label for="action-combobox">Action:</label>
+            <input type="text" id="action-combobox" list="action-list">
+            <datalist id="action-list">
+                <option value="Online">
+                <option value="Away">
+                <option value="Busy">
+            </datalist>
+            <button id="save-action">Save</button>
+            <button id="discard-action">Discard</button>
+        </div>
+    </div>
+
     
+    
+    
+    <script src="script.js"></script>
 
 </body>
 </html>

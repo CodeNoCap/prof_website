@@ -62,69 +62,107 @@ body {
     font-weight: normal;
 }
 
-.status-bar {
+.status-widget-container {
     position: absolute;
-    top: 330px;
-    left: 300px;
+    top: 300px;
+    left: 330px;
     display: flex;
     flex-direction: column;
-    gap: 20px; /* Space between the widgets */
+    gap: 20px; /* Space between widgets */
 }
 
 .status-widget {
+    padding: 20px;
+    border-radius: 8px;
     display: flex;
     flex-direction: column;
-    max-width: 300px; /* Adjust this as needed */
-    padding: 10px;
-    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
-.statususername {
-    font-size: 32px;
+.status-widget:hover {
+    background-color: #0c5f438b;
+}
+
+.status-username {
+    font-size: 24px;
+    font-family: 'Outfit', sans-serif;
     font-weight: 525; /* Semibold */
     color: #CAD1A5;
-    margin-bottom: 10px;
 }
 
-.status-details {
+.status-info {
     display: flex;
     align-items: center;
-    gap: 20px;
+    margin-top: 10px;
 }
 
 .status-circle {
     width: 30px;
     height: 30px;
-    background-color: #4BC19F;
     border-radius: 50%;
+    background-color: #CAD1A5; /* Default status color */
+    margin-right: 15px;
 }
 
-.status-text {
+.status-details {
     display: flex;
     flex-direction: column;
 }
 
 .action {
-    font-family: 'Roboto', sans-serif;
     font-size: 24px;
-    font-weight: normal;
+    font-family: 'Roboto', sans-serif;
     color: white;
 }
 
 .time-elapsed {
-    font-family: 'Roboto', sans-serif;
     font-size: 16px;
+    font-family: 'Roboto', sans-serif;
     color: #359F8B;
+    margin-top: 5px;
 }
 
-@media (max-width: 1024px) {
-    .status-bar {
-        top: 20%;
-        left: 5%;
-    }
+/* Popup styling */
+.popup {
+    position: absolute;
+    background-color: #222;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+    top: 200px; /* Adjust as needed */
+    left: 400px; /* Adjust as needed */
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
 
-    .status-widget {
-        max-width: 100%;
-        padding: 15px;
-    }
+.popup.hidden {
+    display: none;
+}
+
+.popup-content label {
+    display: block;
+    margin-bottom: 5px;
+    color: white;
+    font-family: 'Roboto', sans-serif;
+}
+
+.popup-content input, .popup-content select {
+    width: 100%;
+    padding: 5px;
+    margin-bottom: 10px;
+    font-family: 'Roboto', sans-serif;
+}
+
+.popup-content button {
+    padding: 10px;
+    background-color: #4BC19F;
+    border: none;
+    color: white;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.popup-content button#discard-action {
+    background-color: #D15658;
 }
