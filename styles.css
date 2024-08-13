@@ -53,12 +53,78 @@ body {
     gap: 10px;
 }
 
-.profile img {
-    width: 40px; /* Adjust the size as needed */
-    height: 40px;
+.profile .material-icons {
+    font-size: 46px;
 }
 
 .profile .username {
     font-size: 32px;
     font-weight: normal;
+}
+
+.status-bar {
+    position: absolute;
+    top: 330px;
+    left: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Space between the widgets */
+}
+
+.status-widget {
+    display: flex;
+    flex-direction: column;
+    max-width: 300px; /* Adjust this as needed */
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.statususername {
+    font-size: 32px;
+    font-weight: 525; /* Semibold */
+    color: #CAD1A5;
+    margin-bottom: 10px;
+}
+
+.status-details {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.status-circle {
+    width: 30px;
+    height: 30px;
+    background-color: #4BC19F;
+    border-radius: 50%;
+}
+
+.status-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.action {
+    font-family: 'Roboto', sans-serif;
+    font-size: 24px;
+    font-weight: normal;
+    color: white;
+}
+
+.time-elapsed {
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+    color: #359F8B;
+}
+
+@media (max-width: 1024px) {
+    .status-bar {
+        top: 20%;
+        left: 5%;
+    }
+
+    .status-widget {
+        max-width: 100%;
+        padding: 15px;
+    }
 }
