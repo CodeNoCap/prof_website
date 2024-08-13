@@ -23,8 +23,8 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 166px 0 200px;
-    height: 80px; /* Adjust the height as needed */
+    padding: 50px 166px;
+    height: 80px;
 }
 
 .logo h1 {
@@ -38,7 +38,7 @@ body {
 }
 
 .navigation ul li a {
-    font-size: 44px;
+    font-size: 32px;
     font-weight: normal;
     transition: color 0.3s ease;
 }
