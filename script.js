@@ -22,18 +22,28 @@ document.addEventListener('DOMContentLoaded', function () {
 function handleCredentialResponse(response) {
     const data = jwt_decode(response.credential);
 
-    // Extract the user data needed
     const googleUsername = data.name;
     const profilePicture = data.picture;
     const email = data.email;
-    const googleUserId = data.sub; // Google User ID
-    const googleAuthToken = response.credential; // Token for API access
+    const googleUserId = data.sub;
+    const googleAuthToken = response.credential;
 
-    // Update the profile UI
+    // Update the username text
     document.getElementById('username').textContent = googleUsername;
-    document.getElementById('profile-icon').src = profilePicture;
 
-    // Store the user data for later use (e.g., for Google Calendar integration)
+    // Replace the Material Icon with the profile picture
+    const profileIconElement = document.getElementById('profile-icon');
+    const imgElement = document.createElement('img');
+    imgElement.src = profilePicture;
+    imgElement.alt = 'Profile Picture';
+    imgElement.style.width = '32px'; // Set the desired width
+    imgElement.style.height = '32px'; // Set the desired height
+    imgElement.style.borderRadius = '50%'; // Make it a circle if desired
+
+    // Replace the icon with the new img element
+    profileIconElement.parentNode.replaceChild(imgElement, profileIconElement);
+
+    // Store the user data in localStorage for future use
     localStorage.setItem('googleUserData', JSON.stringify({
         googleUsername,
         profilePicture,
@@ -41,8 +51,6 @@ function handleCredentialResponse(response) {
         googleUserId,
         googleAuthToken
     }));
-
-    console.log("Google User Logged In:", googleUsername);
 }
 
 document.getElementById('google-signin').addEventListener('click', () => {
