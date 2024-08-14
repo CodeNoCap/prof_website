@@ -62,6 +62,10 @@ body {
     font-weight: normal;
 }
 
+.profile:hover {
+    color: #04413a;
+}
+
 .status-widget-container {
     position: absolute;
     top: 300px;

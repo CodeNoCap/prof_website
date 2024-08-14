@@ -1,9 +1,23 @@
 // Select all status widgets
 const statusWidgets = document.querySelectorAll('.status-widget');
+const profileWidget = document.querySelectorAll('.profile');
 const popup = document.querySelector('.popup');
 const statusDropdown = document.getElementById('status-dropdown');
 const actionCombobox = document.getElementById('action-combobox');
 let activeWidget = null;
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Initialize Google Sign-In button
+    google.accounts.id.initialize({
+        client_id: "29223993159-rnmupeuep8akov7uvvlaopg8ar404986.apps.googleusercontent.com",
+        callback: handleCredentialResponse
+    });
+
+    // Trigger Google Sign-In when the profile icon or username is clicked
+    document.getElementById('google-signin').addEventListener('click', () => {
+        google.accounts.id.prompt(); // Trigger the Google Sign-In prompt manually
+    });
+});
 
 function handleCredentialResponse(response) {
     const data = jwt_decode(response.credential);
@@ -31,12 +45,11 @@ function handleCredentialResponse(response) {
     console.log("Google User Logged In:", googleUsername);
 }
 
-// Include JWT Decode Library
-<script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
-
 document.getElementById('google-signin').addEventListener('click', () => {
     // Trigger the Google Sign-In prompt
+    console.log("Clicked!");
     google.accounts.id.prompt();
+    
 });
 
 // Function to open the popup
@@ -44,6 +57,7 @@ statusWidgets.forEach(widget => {
     widget.addEventListener('mouseover', () => {
         popup.classList.remove('hidden');
         activeWidget = widget;
+        
 
     });
 
@@ -70,6 +84,7 @@ document.getElementById('discard-action').addEventListener('click', () => {
 document.getElementById('save-action').addEventListener('click', () => {
     const newStatus = statusDropdown.value;
     const newAction = actionCombobox.value;
+    console.log('hover!');
 
     // Update status circle color
     const statusCircle = activeWidget.querySelector('.status-circle');
