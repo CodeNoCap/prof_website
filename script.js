@@ -31,11 +31,7 @@ function handleCredentialResponse(response) {
 
     // Update the profile UI
     document.getElementById('username').textContent = googleUsername;
-    if (document.querySelector('#profilePicture')) {
-    document.querySelector('#profilePicture').src = 'URL_TO_PROFILE_PICTURE';
-    } else {
-        console.error('Profile picture element not found.');
-    }
+    document.getElementById('profile-icon').src = profilePicture;
 
     // Store the user data for later use (e.g., for Google Calendar integration)
     localStorage.setItem('googleUserData', JSON.stringify({
@@ -88,7 +84,7 @@ document.getElementById('discard-action').addEventListener('click', () => {
 document.getElementById('save-action').addEventListener('click', () => {
     const newStatus = statusDropdown.value;
     const newAction = actionCombobox.value;
-    console.log('hover!');
+    
 
     // Update status circle color
     const statusCircle = activeWidget.querySelector('.status-circle');
