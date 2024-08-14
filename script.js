@@ -19,38 +19,55 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+function downloadImage(url, filename) {
+    fetch(url)
+        .then(response => response.blob())
+        .then(blob => {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+        })
+        .catch(console.error);
+}
+
 function handleCredentialResponse(response) {
     const data = jwt_decode(response.credential);
 
     const googleUsername = data.name;
-    const profilePicture = data.picture;
+    const profilePicture = data.picture; 
     const email = data.email;
     const googleUserId = data.sub;
     const googleAuthToken = response.credential;
 
-    // Update the username text
-    document.getElementById('username').textContent = googleUsername;
+    if (profilePicture) {
+        console.log('Profile Picture URL:', profilePicture);
 
-    // Replace the Material Icon with the profile picture
-    const profileIconElement = document.getElementById('profile-icon');
-    const imgElement = document.createElement('img');
-    imgElement.src = profilePicture;
-    imgElement.alt = 'Profile Picture';
-    imgElement.style.width = '32px'; // Set the desired width
-    imgElement.style.height = '32px'; // Set the desired height
-    imgElement.style.borderRadius = '50%'; // Make it a circle if desired
+        // Save the profile picture locally (browser will prompt to download the image)
+        downloadImage(profilePicture, 'google_profile_picture.jpg');
 
-    // Replace the icon with the new img element
-    profileIconElement.parentNode.replaceChild(imgElement, profileIconElement);
+        document.getElementById('username').textContent = googleUsername;
 
-    // Store the user data in localStorage for future use
-    localStorage.setItem('googleUserData', JSON.stringify({
-        googleUsername,
-        profilePicture,
-        email,
-        googleUserId,
-        googleAuthToken
-    }));
+        const profileIconElement = document.getElementById('profile-icon');
+        const imgElement = document.createElement('img');
+        imgElement.src = profilePicture;
+        imgElement.alt = 'Profile Picture';
+        imgElement.style.width = '32px';
+        imgElement.style.height = '32px';
+        imgElement.style.borderRadius = '50%';
+
+        profileIconElement.parentNode.replaceChild(imgElement, profileIconElement);
+
+        localStorage.setItem('googleUserData', JSON.stringify({
+            googleUsername,
+            profilePicture,
+            email,
+            googleUserId,
+            googleAuthToken
+        }));
+    } else {
+        console.error('No profile picture found!');
+    }
 }
 
 document.getElementById('google-signin').addEventListener('click', () => {
@@ -60,10 +77,30 @@ document.getElementById('google-signin').addEventListener('click', () => {
     
 });
 
+const statusOptions = document.querySelectorAll('.status-option');
+let selectedStatus = 'active';
+
+statusOptions.forEach(option => {
+    option.addEventListener('click', () => {
+        // Remove the 'selected' class from all options
+        statusOptions.forEach(opt => opt.classList.remove('selected'));
+
+        // Add the 'selected' class to the clicked option
+        option.classList.add('selected');
+
+        // Set the selected status
+        selectedStatus = option.getAttribute('data-status');
+    });
+});
+
 // Function to open the popup
 statusWidgets.forEach(widget => {
     widget.addEventListener('mouseover', () => {
         popup.classList.remove('hidden');
+        rect = widget.getBoundingClientRect(); // Calculate rect here
+        popup.style.top = `${rect.top + window.scrollY}px`;
+        popup.style.left = `${rect.right + window.scrollX}px`; // 10px gap from the widget
+
         activeWidget = widget;
         
 
@@ -90,17 +127,15 @@ document.getElementById('discard-action').addEventListener('click', () => {
 
 // Save action
 document.getElementById('save-action').addEventListener('click', () => {
-    const newStatus = statusDropdown.value;
-    const newAction = actionCombobox.value;
-    
+    const newAction = document.getElementById('action-combobox').value;
 
-    // Update status circle color
+    // Update status circle color in the active widget
     const statusCircle = activeWidget.querySelector('.status-circle');
-    if (newStatus === 'active') {
+    if (selectedStatus === 'active') {
         statusCircle.style.backgroundColor = '#4BC19F';
-    } else if (newStatus === 'busy') {
+    } else if (selectedStatus === 'busy') {
         statusCircle.style.backgroundColor = '#CAD1A5';
-    } else if (newStatus === 'offline') {
+    } else if (selectedStatus === 'offline') {
         statusCircle.style.backgroundColor = '#D15658';
     }
 
@@ -108,6 +143,7 @@ document.getElementById('save-action').addEventListener('click', () => {
     activeWidget.querySelector('.action').textContent = newAction;
 
     // Close the popup
-    popup.classList.add('hidden');
+    document.querySelector('.popup').classList.add('hidden');
     activeWidget = null;
 });
+

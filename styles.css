@@ -170,3 +170,44 @@ body {
 .popup-content button#discard-action {
     background-color: #D15658;
 }
+
+.status-options {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.status-option {
+    text-align: center;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 8px;
+    transition: background-color 0.3s;
+}
+
+.status-option:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.status-option.selected {
+    background-color: #0CC6B3;
+}
+
+.status-circle {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    margin: 0 auto 5px;
+}
+
+.status-circle.active {
+    background-color: #4BC19F;
+}
+
+.status-circle.busy {
+    background-color: #CAD1A5;
+}
+
+.status-circle.offline {
+    background-color: #D15658;
+}

@@ -59,12 +59,20 @@
     <!-- Popup Structure -->
     <div class="popup hidden">
         <div class="popup-content">
-            <label for="status-dropdown">Status:</label>
-            <select id="status-dropdown">
-                <option value="active">Active</option>
-                <option value="busy">Busy</option>
-                <option value="offline">Offline</option>
-            </select>
+            <div class="status-options">
+                <div class="status-option" data-status="active">
+                    <div class="status-circle active"></div>
+                    <span>Active</span>
+                </div>
+                <div class="status-option" data-status="busy">
+                    <div class="status-circle busy"></div>
+                    <span>Busy</span>
+                </div>
+                <div class="status-option" data-status="offline">
+                    <div class="status-circle offline"></div>
+                    <span>Offline</span>
+                </div>
+            </div>
             <label for="action-combobox">Action:</label>
             <input type="text" id="action-combobox" list="action-list">
             <datalist id="action-list">
