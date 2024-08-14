@@ -31,7 +31,11 @@ function handleCredentialResponse(response) {
 
     // Update the profile UI
     document.getElementById('username').textContent = googleUsername;
-    document.getElementById('profile-icon').src = profilePicture;
+    if (document.querySelector('#profilePicture')) {
+    document.querySelector('#profilePicture').src = 'URL_TO_PROFILE_PICTURE';
+    } else {
+        console.error('Profile picture element not found.');
+    }
 
     // Store the user data for later use (e.g., for Google Calendar integration)
     localStorage.setItem('googleUserData', JSON.stringify({
