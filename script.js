@@ -61,6 +61,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function handleCredentialResponse(response) {
     const data = jwt_decode(response.credential);
+    console.log("ID Token:", response.credential);
 
     const googleUsername = data.name;
     const profilePicture = data.picture; 
