@@ -5,6 +5,45 @@ const popup = document.querySelector('.popup');
 const statusDropdown = document.getElementById('status-dropdown');
 const actionCombobox = document.getElementById('action-combobox');
 let activeWidget = null;
+let rect;
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.8/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/9.6.8/firebase-firestore.js";
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyDXL9721-X8MPLnYRkg_ET4VchuXVtr5Tk",
+    authDomain: "personal-website-432415.firebaseapp.com",
+    projectId: "personal-website-432415",
+    storageBucket: "personal-website-432415.appspot.com",
+    messagingSenderId: "29223993159",
+    appId: "1:29223993159:web:ab01014f8441a02d58d662",
+    measurementId: "G-5M9ZB3PBZC"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+// Global variables
+let habitCompletion = {};
+let userData = {};
+
+
+// Function to initialize app
+async function initializeAppData() {
+    loadDataFromLocalStorage();
+
+    // Check if user data exists locally or load from Firestore
+    const googleUserData = localStorage.getItem('googleUserData');
+    if (!googleUserData) {
+        google.accounts.id.prompt(); // Trigger sign-in if not logged in
+    } else {
+        // Attempt to load user data from Firestore
+        const firestoreLoaded = await loadUserDataFromFirestore();
+        if (!firestoreLoaded) {
+            saveUserDataToFirestore(); // Save default state if Firestore data not found
+        }
+    }
+}
 
 document.addEventListener('DOMContentLoaded', function () {
     // Initialize Google Sign-In button
@@ -15,21 +54,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Trigger Google Sign-In when the profile icon or username is clicked
     document.getElementById('google-signin').addEventListener('click', () => {
+        console.log("")
         google.accounts.id.prompt(); // Trigger the Google Sign-In prompt manually
     });
 });
-
-function downloadImage(url, filename) {
-    fetch(url)
-        .then(response => response.blob())
-        .then(blob => {
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = filename;
-            link.click();
-        })
-        .catch(console.error);
-}
 
 function handleCredentialResponse(response) {
     const data = jwt_decode(response.credential);
@@ -113,6 +141,67 @@ statusWidgets.forEach(widget => {
       });
 });
 
+async function saveUserDataToFirestore() {
+    const googleUserData = JSON.parse(localStorage.getItem('googleUserData'));
+
+    if (googleUserData) {
+        const docRef = doc(db, "users", googleUserData.googleUserId);
+        try {
+            await setDoc(docRef, {
+                status: userData.status,
+                habits: habitCompletion,
+            });
+            console.log("User data successfully saved to Firestore!");
+        } catch (error) {
+            console.error("Error saving data to Firestore:", error);
+        }
+    }
+}
+
+// Function to load user data from Firestore
+async function loadUserDataFromFirestore() {
+    const googleUserData = JSON.parse(localStorage.getItem('googleUserData'));
+
+    if (googleUserData) {
+        const docRef = doc(db, "users", googleUserData.googleUserId);
+        try {
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                userData.status = data.status || {};
+                habitCompletion = data.habits || {};
+                console.log("User data successfully loaded from Firestore!");
+                return true;
+            } else {
+                console.log("No such document!");
+                return false;
+            }
+        } catch (error) {
+            console.error("Error loading data from Firestore:", error);
+            return false;
+        }
+    }
+}
+
+// Function to save data to local storage
+function saveDataToLocalStorage() {
+    localStorage.setItem('habitCompletion', JSON.stringify(habitCompletion));
+    localStorage.setItem('userData', JSON.stringify(userData));
+}
+
+// Function to load data from local storage
+function loadDataFromLocalStorage() {
+    habitCompletion = JSON.parse(localStorage.getItem('habitCompletion')) || {};
+    userData = JSON.parse(localStorage.getItem('userData')) || {
+        status: {
+            action: "Online",
+            timeElapsed: "Just now"
+        }
+    };
+}
+
+
+
 popup.addEventListener('mouseout', (event) => {
     if (!widget.contains(event.relatedTarget) && !popup.contains(event.relatedTarget)) {
       popup.classList.add('hidden');
@@ -147,13 +236,46 @@ document.getElementById('save-action').addEventListener('click', () => {
     activeWidget = null;
 });
 
+
+
+async function testFirestoreConnection() {
+    try {
+        // Reference to a document in Firestore (e.g., collection "testCollection" and document "testDoc")
+        const docRef = doc(db, "testCollection", "testDoc");
+
+        // Write data to Firestore
+        await setDoc(docRef, {
+            message: "hello world"
+        });
+        console.log("Successfully wrote 'hello world' to Firestore!");
+
+        // Read the data back from Firestore
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            console.log("Document data:", docSnap.data());
+        } else {
+            console.log("No such document!");
+        }
+    } catch (error) {
+        console.error("Error connecting to Firestore: ", error);
+    }
+}
+
+// Run the test function
+testFirestoreConnection();
+
+
+
 document.addEventListener("DOMContentLoaded", function() {
     const habits = ['studying', 'reading', 'cleaning'];
     let habitCompletion = {};
     const today = new Date().toISOString().slice(0, 10); // Get today's date in yyyy-mm-dd format
     
+    
     // Load data from localStorage
-    loadData();
+    initializeAppData(); // Load data on page load
+
 
     // Add click event listeners to habit icons
     document.querySelectorAll('.habit').forEach(habit => {
@@ -162,7 +284,8 @@ document.addEventListener("DOMContentLoaded", function() {
             toggleHabitCompletion(habitName);
             toggleHabitVisualState(this);
             updateHeatmap();
-            saveData();
+            saveDataToLocalStorage();
+            saveUserDataToFirestore();
         });
     });
 
@@ -214,4 +337,3 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 });
-
