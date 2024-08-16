@@ -34,32 +34,103 @@ async function initializeAppData() {
 
     // Check if user data exists locally or load from Firestore
     const googleUserData = localStorage.getItem('googleUserData');
-    if (!googleUserData) {
-        google.accounts.id.prompt(); // Trigger sign-in if not logged in
-    } else {
+
+
+    if (googleUserData) {
         // Attempt to load user data from Firestore
         const firestoreLoaded = await loadUserDataFromFirestore();
         if (!firestoreLoaded) {
             saveUserDataToFirestore(); // Save default state if Firestore data not found
         }
+    } else {
+        console.log("Google user data not found.")
     }
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-    // Initialize Google Sign-In button
+document.addEventListener("DOMContentLoaded", function() {
+    const habits = ['studying', 'reading', 'cleaning'];
+    let habitCompletion = {};
+    const today = new Date().toISOString().slice(0, 10); // Get today's date in yyyy-mm-dd format
+    
     google.accounts.id.initialize({
         client_id: "29223993159-rnmupeuep8akov7uvvlaopg8ar404986.apps.googleusercontent.com",
         callback: handleCredentialResponse
     });
 
-    // Trigger Google Sign-In when the profile icon or username is clicked
-    document.getElementById('google-signin').addEventListener('click', () => {
+     // Trigger Google Sign-In when the profile icon or username is clicked
+     document.getElementById('google-signin').addEventListener('click', () => {
         console.log("")
         google.accounts.id.prompt(); // Trigger the Google Sign-In prompt manually
     });
+    
+    // Load data from localStorage
+    initializeAppData(); // Load data on page load
+
+
+    // Add click event listeners to habit icons
+    document.querySelectorAll('.habit').forEach(habit => {
+        habit.addEventListener('click', function() {
+            const habitName = this.getAttribute('data-habit');
+            toggleHabitCompletion(habitName);
+            toggleHabitVisualState(this);
+            updateHeatmap();
+            saveDataToLocalStorage();
+            saveUserDataToFirestore();
+        });
+    });
+
+    // Function to toggle habit completion
+    function toggleHabitCompletion(habitName) {
+        habitCompletion[today] = habitCompletion[today] || {};
+        habitCompletion[today][habitName] = !habitCompletion[today][habitName];
+    }
+
+    // Function to toggle the visual state of the habit
+    function toggleHabitVisualState(habitElement) {
+        habitElement.classList.toggle('completed');
+    }
+
+    // Function to update the heatmap
+    function updateHeatmap() {
+        const totalHabits = habits.length;
+        const completedHabits = Object.values(habitCompletion[today] || {}).filter(Boolean).length;
+        const completionPercent = (completedHabits / totalHabits) * 100;
+
+        // Update only today's square
+        const dayIndex = new Date().getDate() - 1; // Get index for today's square (assuming a fixed grid for simplicity)
+        const todaySquare = document.querySelectorAll('.day-square')[dayIndex];
+
+        todaySquare.style.backgroundColor = `rgba(12, 198, 179, ${completionPercent / 100})`; // Updated fill color
+        if (completionPercent === 100) {
+            todaySquare.innerHTML = '<i class="material-icons">star</i>';
+        } else {
+            todaySquare.innerHTML = '';
+        }
+    }
+
+    // Function to save data to localStorage
+    function saveData() {
+        localStorage.setItem('habitCompletion', JSON.stringify(habitCompletion));
+    }
+
+    // Function to load data from localStorage
+    function loadData() {
+        habitCompletion = JSON.parse(localStorage.getItem('habitCompletion')) || {};
+        if (habitCompletion[today]) {
+            habits.forEach(habit => {
+                if (habitCompletion[today][habit]) {
+                    const habitElement = document.querySelector(`[data-habit="${habit}"]`);
+                    habitElement.classList.add('completed'); // Add completed class if already completed
+                }
+            });
+            updateHeatmap();
+        }
+    }
 });
 
 function handleCredentialResponse(response) {
+    console.log("Handle Credential Response Called");
+    console.log("Response:", response);
     const data = jwt_decode(response.credential);
     console.log("ID Token:", response.credential);
 
@@ -71,10 +142,6 @@ function handleCredentialResponse(response) {
 
     if (profilePicture) {
         console.log('Profile Picture URL:', profilePicture);
-
-        // Save the profile picture locally (browser will prompt to download the image)
-        downloadImage(profilePicture, 'google_profile_picture.jpg');
-
         document.getElementById('username').textContent = googleUsername;
 
         const profileIconElement = document.getElementById('profile-icon');
@@ -99,12 +166,6 @@ function handleCredentialResponse(response) {
     }
 }
 
-document.getElementById('google-signin').addEventListener('click', () => {
-    // Trigger the Google Sign-In prompt
-    console.log("Clicked!");
-    google.accounts.id.prompt();
-    
-});
 
 const statusOptions = document.querySelectorAll('.status-option');
 let selectedStatus = 'active';
@@ -268,73 +329,4 @@ testFirestoreConnection();
 
 
 
-document.addEventListener("DOMContentLoaded", function() {
-    const habits = ['studying', 'reading', 'cleaning'];
-    let habitCompletion = {};
-    const today = new Date().toISOString().slice(0, 10); // Get today's date in yyyy-mm-dd format
-    
-    
-    // Load data from localStorage
-    initializeAppData(); // Load data on page load
 
-
-    // Add click event listeners to habit icons
-    document.querySelectorAll('.habit').forEach(habit => {
-        habit.addEventListener('click', function() {
-            const habitName = this.getAttribute('data-habit');
-            toggleHabitCompletion(habitName);
-            toggleHabitVisualState(this);
-            updateHeatmap();
-            saveDataToLocalStorage();
-            saveUserDataToFirestore();
-        });
-    });
-
-    // Function to toggle habit completion
-    function toggleHabitCompletion(habitName) {
-        habitCompletion[today] = habitCompletion[today] || {};
-        habitCompletion[today][habitName] = !habitCompletion[today][habitName];
-    }
-
-    // Function to toggle the visual state of the habit
-    function toggleHabitVisualState(habitElement) {
-        habitElement.classList.toggle('completed');
-    }
-
-    // Function to update the heatmap
-    function updateHeatmap() {
-        const totalHabits = habits.length;
-        const completedHabits = Object.values(habitCompletion[today] || {}).filter(Boolean).length;
-        const completionPercent = (completedHabits / totalHabits) * 100;
-
-        // Update only today's square
-        const dayIndex = new Date().getDate() - 1; // Get index for today's square (assuming a fixed grid for simplicity)
-        const todaySquare = document.querySelectorAll('.day-square')[dayIndex];
-
-        todaySquare.style.backgroundColor = `rgba(12, 198, 179, ${completionPercent / 100})`; // Updated fill color
-        if (completionPercent === 100) {
-            todaySquare.innerHTML = '<i class="material-icons">star</i>';
-        } else {
-            todaySquare.innerHTML = '';
-        }
-    }
-
-    // Function to save data to localStorage
-    function saveData() {
-        localStorage.setItem('habitCompletion', JSON.stringify(habitCompletion));
-    }
-
-    // Function to load data from localStorage
-    function loadData() {
-        habitCompletion = JSON.parse(localStorage.getItem('habitCompletion')) || {};
-        if (habitCompletion[today]) {
-            habits.forEach(habit => {
-                if (habitCompletion[today][habit]) {
-                    const habitElement = document.querySelector(`[data-habit="${habit}"]`);
-                    habitElement.classList.add('completed'); // Add completed class if already completed
-                }
-            });
-            updateHeatmap();
-        }
-    }
-});
