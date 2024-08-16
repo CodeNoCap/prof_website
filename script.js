@@ -23,12 +23,9 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-// Global variables
 let habitCompletion = {};
 let userData = {};
 
-
-// Function to initialize app
 async function initializeAppData() {
     loadDataFromLocalStorage();
 
@@ -51,7 +48,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const habits = ['studying', 'reading', 'cleaning'];
     let habitCompletion = {};
     const today = new Date().toISOString().slice(0, 10); // Get today's date in yyyy-mm-dd format
-    
+
     google.accounts.id.initialize({
         client_id: "29223993159-rnmupeuep8akov7uvvlaopg8ar404986.apps.googleusercontent.com",
         callback: handleCredentialResponse
@@ -59,7 +56,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
      // Trigger Google Sign-In when the profile icon or username is clicked
      document.getElementById('google-signin').addEventListener('click', () => {
-        console.log("")
+        console.log("%c[PROCESS] Google login", "color: yellow")
         google.accounts.id.prompt(); // Trigger the Google Sign-In prompt manually
     });
     
@@ -172,18 +169,12 @@ let selectedStatus = 'active';
 
 statusOptions.forEach(option => {
     option.addEventListener('click', () => {
-        // Remove the 'selected' class from all options
         statusOptions.forEach(opt => opt.classList.remove('selected'));
-
-        // Add the 'selected' class to the clicked option
         option.classList.add('selected');
-
-        // Set the selected status
         selectedStatus = option.getAttribute('data-status');
     });
 });
 
-// Function to open the popup
 statusWidgets.forEach(widget => {
     widget.addEventListener('mouseover', () => {
         popup.classList.remove('hidden');
@@ -192,6 +183,12 @@ statusWidgets.forEach(widget => {
         popup.style.left = `${rect.right + window.scrollX}px`; // 10px gap from the widget
 
         activeWidget = widget;
+
+        popup.addEventListener('mouseout', (event) => {
+            if (!widget.contains(event.relatedTarget) && !popup.contains(event.relatedTarget)) {
+              popup.classList.add('hidden');
+            }
+          });
         
 
     });
@@ -212,8 +209,10 @@ async function saveUserDataToFirestore() {
             await setDoc(docRef, {
                 status: userData.status,
                 habits: habitCompletion,
-            });
-            console.log("User data successfully saved to Firestore!");
+                activity: userData.activity,
+                timeElapsed: userData.timeElapsed,
+            }, { merge: true}); 
+            console.log("User data successfully saved to Firestore: \nstatus: userData.status\nhabits: habitCompletion\nactivity: userData.activity\ntimeElapsed: userData.timeElapsed");
         } catch (error) {
             console.error("Error saving data to Firestore:", error);
         }
@@ -232,7 +231,9 @@ async function loadUserDataFromFirestore() {
                 const data = docSnap.data();
                 userData.status = data.status || {};
                 habitCompletion = data.habits || {};
-                console.log("User data successfully loaded from Firestore!");
+                userData.activity = data.activity || {};
+                userData.timeElapsed = data.timeElapsed || {};
+                console.log("%c[SAVE DATA] User data successfully saved to Firestore: \nstatus: userData.status\nhabits: habitCompletion\nactivity: userData.activity\ntimeElapsed: userData.timeElapsed", "color: lime green");
                 return true;
             } else {
                 console.log("No such document!");
@@ -264,11 +265,7 @@ function loadDataFromLocalStorage() {
 
 
 
-popup.addEventListener('mouseout', (event) => {
-    if (!widget.contains(event.relatedTarget) && !popup.contains(event.relatedTarget)) {
-      popup.classList.add('hidden');
-    }
-  });
+
 
 // Function to close the popup
 document.getElementById('discard-action').addEventListener('click', () => {
@@ -293,6 +290,21 @@ document.getElementById('save-action').addEventListener('click', () => {
     // Update action text
     activeWidget.querySelector('.action').textContent = newAction;
 
+    // Update time elapsed text
+    const now = new Date();
+    const hours = now.getHours() > 12 ? now.getHours() - 12 : now.getHours();
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const period = now.getHours() >= 12 ? 'PM' : 'AM';
+    const timeString = `since ${hours}:${minutes} ${period}`;
+    activeWidget.querySelector('.time-elapsed').textContent = timeString;
+
+    // Save the updated state to Firestore
+    userData.status = selectedStatus;
+    userData.activity = newAction;
+    userData.timeElapsed = timeString;
+    saveUserDataToFirestore();
+    console.log("%c[UPDATE] Saving data...", "color: yellow")
+
     // Close the popup
     document.querySelector('.popup').classList.add('hidden');
     activeWidget = null;
@@ -302,29 +314,23 @@ document.getElementById('save-action').addEventListener('click', () => {
 
 async function testFirestoreConnection() {
     try {
-        // Reference to a document in Firestore (e.g., collection "testCollection" and document "testDoc")
         const docRef = doc(db, "testCollection", "testDoc");
-
-        // Write data to Firestore
         await setDoc(docRef, {
             message: "hello world"
         });
-        console.log("Successfully wrote 'hello world' to Firestore!");
-
-        // Read the data back from Firestore
+        console.log("%c[WRITE: CONFIRMED] Write process to Firestore confirmed!", "color: limegreen");
+        
         const docSnap = await getDoc(docRef);
-
         if (docSnap.exists()) {
-            console.log("Document data:", docSnap.data());
+            console.log("%c[READ: CONFIRMED] Data: ", "color: limegreen", docSnap.data());
         } else {
             console.log("No such document!");
         }
     } catch (error) {
-        console.error("Error connecting to Firestore: ", error);
+        console.error("$cError connecting to Firestore: ", error, "color: red");
     }
 }
 
-// Run the test function
 testFirestoreConnection();
 
 
